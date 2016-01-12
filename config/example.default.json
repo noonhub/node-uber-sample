@@ -1,0 +1,10 @@
+// WARNING: This is just an example, never check any deployment secrets into source control.
+{
+  "uber": {
+    "client_id": "CLIENT_ID",
+    "client_secret": "CLIENT_SECRET",
+    "redirect_uri": "REDIRECT_URI"
+  },
+  "port": "3000",
+  "secret" : "<ANY_SECRET_STRING>"
+}

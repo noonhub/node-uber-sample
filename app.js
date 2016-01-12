@@ -35,7 +35,7 @@ app.get('/uber/oauth_callback', function (req, res) {
     console.log('/callback', code);
     oauth2.authCode.getToken({
         code: code,
-        redirect_uri: 'http://localhost:3000/uber/oauth_callback'
+        redirect_uri: redirect_uri
     }, saveToken);
 
     function saveToken(error, token) {
