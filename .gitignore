@@ -1,5 +1,4 @@
 bin
 node_modules
-.idea
 *.iml
 config/default.json
