@@ -8,9 +8,9 @@ More features coming soon
  * [npm](https://www.npmjs.com/)
 
 ### Getting Started
- * git clone git@github.com:noonhub/node-uber-sample.git
- * cd node-uber-sample
- * npm install
- * cp config/example.default.json
- * open config/default.json and fill in your applications configuration found at https://developer.uber.com/dashboard
- * node app.js
+ * `git clone git@github.com:noonhub/node-uber-sample.git`
+ * `cd node-uber-sample`
+ * `npm install`
+ * `cp config/example.default.json`
+ * `open `config/default.json` and fill in your applications configuration found at https://developer.uber.com/dashboard
+ * Run the app! `node app.js`
