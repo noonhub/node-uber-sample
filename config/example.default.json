@@ -1,9 +1,10 @@
-// WARNING: This is just an example, never check any deployment secrets into source control.
+// WARNING: This is an example configuration file, never check any deployment secrets into source control.
 {
   "uber": {
     "client_id": "CLIENT_ID",
     "client_secret": "CLIENT_SECRET",
-    "redirect_uri": "REDIRECT_URI"
+    "redirect_host": "REDIRECT_URI",
+    "redirect_path": "REDIRECT_PATH"
   },
   "port": "3000",
   "secret" : "<ANY_SECRET_STRING>"
