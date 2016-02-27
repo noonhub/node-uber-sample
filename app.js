@@ -32,7 +32,7 @@ app.use(session({
     saveUninitialized: true
 }));
 
-var sessionClients = new Object();
+var sessionClients = {};
 
 var oauth2 = require('simple-oauth2')({
     clientID: config.get('uber.client_id'),
@@ -47,10 +47,8 @@ switch (config.env) {
     case "prod":
         uberApiHost = 'https://api.uber.com/v1';
         break;
-    case "sand":
-        uberApiHost = 'https://sandbox-api.uber.com/v1';
     default:
-        uberApiHost = 'http://localhost:8080';
+        uberApiHost = 'https://sandbox-api.uber.com/v1';
 }
 
 // Authorization uri definition
@@ -80,7 +78,7 @@ app.get(redirect_path, function (req, res) {
         var accessToken = oauth2.accessToken.create(token);
 
         sessionClients[req.session.id] = accessToken;
-        res.redirect('/home')
+        res.redirect('/home');
     }
 });
 
@@ -93,27 +91,84 @@ app.get('/home', function (req, res) {
 });
 
 app.get('/surge', function (req, res) {
-    requestRide()
+    requestTrip()
 });
 
-app.post('/ride', function (req, res) {
-    var credentials = sessionClients[req.session.id];
+app.get('/trip/:tripId', function (req, res) {
+    var tripId = req.params.tripId;
+    req.session.current_trip = tripId;
 
-    var token = credentials.token.access_token;
+    var token = getTokenFromSession(req.session.id);
+    if (!token) {
+        res.redirect('/')
+    }
+
+    getTripDetails(tripId, token, function (error, response, body) {
+        res.render('trip', {"trip": JSON.stringify(body)})
+    });
+});
+
+app.get('/trip/:tripId/:status', function (req, res) {
+    var token = getTokenFromSession(req.session.id);
+    if (!token) {
+        res.redirect('/')
+    }
+
+    var status = req.params.status;
+    var tripId = req.params.tripId;
+
+    request.put({
+        url: uberApiHost + "/sandbox/requests/" + tripId,
+        json: true,
+        headers: {
+            "content-type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: {
+            "status": status
+        }
+    }, function (error, response, body) {
+        res.redirect('/trip/' + tripId)
+    })
+});
+
+app.post('/trip', function (req, res) {
+    var token = getTokenFromSession(req.session.id);
+    if (!token) {
+        res.redirect('/')
+    }
 
     var body = {
         "start_latitude": req.body.lat,
         "start_longitude": req.body.lng
     };
 
-    requestRide(body, token, function (error, response, body) {
-        if (response.statusCode == 409) {
-            res.redirect(body.meta.surge_confirmation.href)
+    requestTrip(body, token, function (error, response, body) {
+        switch (response.statusCode) {
+            case 409:
+                res.redirect(body.meta.surge_confirmation.href);
+                break;
+            case 202:
+                // Request accepted
+                var requestId = body.request_id;
+                res.redirect('/trip/' + requestId);
+                break;
+            default:
+
         }
     })
 });
 
-function requestRide(body, token, callback) {
+function getTokenFromSession(session) {
+    var credentials = sessionClients[session];
+    var token = null;
+    if (credentials) {
+        token = credentials.token.access_token;
+    }
+    return token;
+}
+
+function requestTrip(body, token, callback) {
     request.post({
         url: uberApiHost + "/requests",
         json: true,
@@ -123,6 +178,17 @@ function requestRide(body, token, callback) {
         },
         body: body
     }, callback)
+}
+
+function getTripDetails(tripId, token, callback) {
+    request.get({
+        url: uberApiHost + "/requests/" + tripId,
+        json: true,
+        headers: {
+            "content-type": "application/json",
+            "Authorization": "Bearer " + token
+        }
+    }, callback);
 }
 
 app.listen(port);
