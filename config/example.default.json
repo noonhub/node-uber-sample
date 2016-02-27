@@ -13,5 +13,6 @@
     "scopes": "SPACE DELIMITED SCOPES"
   },
   "port": "3000",
-  "secret" : "<ANY_SECRET_STRING>"
+  "secret" : "<ANY_SECRET_STRING>",
+  "env": "sand"
 }
