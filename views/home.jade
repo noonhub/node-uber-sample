@@ -8,12 +8,10 @@ block content
         div.page-header
             h1 Welcome
         div
-            h3 Where would you like  to be picked up?
+            h4 Where would you like  to be picked up?
         form(name="trip", action="/trip", method="post")
             input(id="lat" type="text", name="lat")
             input(id="lng" type="text", name="lng")
             input(type="submit", value="Request A Ride")
-        #loading
-        br
-        #map
+            div.container.text-center#map
 

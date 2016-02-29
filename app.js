@@ -104,7 +104,7 @@ app.get('/trip/:tripId', function (req, res) {
     }
 
     getTripDetails(tripId, token, function (error, response, body) {
-        res.render('trip', {"trip": JSON.stringify(body)})
+        res.render('trip', {"data": JSON.stringify(body, null, 2)})
     });
 });
 
