@@ -1,15 +1,25 @@
 body {
-  padding: 30px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    padding: 30px;
+    font-family: ff-clan-web-pro-wide, "Helvetica Neue", Helvetica, sans-serif;
+    background-color: #222231;
+    color: white;
+    margin: 0 0 .5em 0;
 }
 
-h2 {
-  margin:0 0 .5em 0;
+h1 {
+    color: white;
+    margin: 0 0 .5em 0;
 }
+
+form {
+    color: black;
+}
+
 #map {
-  width:500px;
-  height:500px
+    width: 500px;
+    height: 500px
 }
+
 a {
-  color: #00B7FF;
+    color: #00B7FF;
 }
