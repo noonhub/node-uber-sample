@@ -11,6 +11,7 @@ var app = express();
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.set('views', './views');
 app.set('view engine', 'jade');
 
@@ -77,6 +78,8 @@ app.get(redirect_path, function (req, res) {
         }
         var accessToken = oauth2.accessToken.create(token);
 
+        console.log(accessToken);
+
         sessionClients[req.session.id] = accessToken;
         res.redirect('/home');
     }
@@ -91,10 +94,17 @@ app.get('/home', function (req, res) {
 });
 
 app.get('/surge', function (req, res) {
-    requestTrip()
+    var token = getTokenFromSession(req.session.id);
+    var body = {
+        "start_latitude": req.session.start_lat,
+        "start_longitude": req.session.start_lng,
+        "surge_confirmation_id": req.query.surge_confirmation_id
+    };
+
+    requestTrip(body, token, res);
 });
 
-app.get('/trip/:tripId', function (req, res) {
+app.get('/trips/:tripId', function (req, res) {
     var tripId = req.params.tripId;
     req.session.current_trip = tripId;
 
@@ -108,7 +118,7 @@ app.get('/trip/:tripId', function (req, res) {
     });
 });
 
-app.get('/trip/:tripId/:status', function (req, res) {
+app.get('/trips/:tripId/:status', function (req, res) {
     var token = getTokenFromSession(req.session.id);
     if (!token) {
         res.redirect('/')
@@ -128,35 +138,32 @@ app.get('/trip/:tripId/:status', function (req, res) {
             "status": status
         }
     }, function (error, response, body) {
-        res.redirect('/trip/' + tripId)
+        res.redirect('/trips/' + tripId)
     })
 });
 
-app.post('/trip', function (req, res) {
+app.post('/trips', function (req, res) {
     var token = getTokenFromSession(req.session.id);
     if (!token) {
         res.redirect('/')
     }
 
+    var startLatitude = req.body.lat;
+    var startLongitude = req.body.lng;
+    req.session.start_lat = startLatitude;
+    req.session.start_lng = startLongitude;
+
     var body = {
-        "start_latitude": req.body.lat,
-        "start_longitude": req.body.lng
+        "start_latitude": startLatitude,
+        "start_longitude": startLongitude
     };
 
-    requestTrip(body, token, function (error, response, body) {
-        switch (response.statusCode) {
-            case 409:
-                res.redirect(body.meta.surge_confirmation.href);
-                break;
-            case 202:
-                // Request accepted
-                var requestId = body.request_id;
-                res.redirect('/trip/' + requestId);
-                break;
-            default:
+    requestTrip(body, token, res);
+});
 
-        }
-    })
+app.post('/webhooks', function (req, res) {
+    console.log(JSON.stringify(req.body, null, 2));
+    res.send("Success");
 });
 
 function getTokenFromSession(session) {
@@ -168,7 +175,7 @@ function getTokenFromSession(session) {
     return token;
 }
 
-function requestTrip(body, token, callback) {
+function requestTrip(body, token, res) {
     request.post({
         url: uberApiHost + "/requests",
         json: true,
@@ -177,7 +184,19 @@ function requestTrip(body, token, callback) {
             "Authorization": "Bearer " + token
         },
         body: body
-    }, callback)
+    }, function (error, response, body) {
+        switch (response.statusCode) {
+            case 409:
+                res.redirect(body.meta.surge_confirmation.href);
+                break;
+            case 202:
+                // Request accepted
+                var requestId = body.request_id;
+                res.redirect('/trips/' + requestId);
+                break;
+            default:
+        }
+    })
 }
 
 function getTripDetails(tripId, token, callback) {
