@@ -26,6 +26,8 @@ var clientSecret = config.get('uber.client_secret');
 var port = config.get('port') || 3000;
 var redirect_host = config.get('uber.redirect_host');
 var redirect_path = config.get('uber.redirect_path');
+var webhook_path = config.get('uber.webhook_path');
+var surge_path = config.get('uber.surge_path');
 
 app.use(session({
     secret: config.get('secret'),
@@ -93,7 +95,7 @@ app.get('/home', function (req, res) {
     res.render('home');
 });
 
-app.get('/surge', function (req, res) {
+app.get(surge_path, function (req, res) {
     var token = getTokenFromSession(req.session.id);
     var body = {
         "start_latitude": req.session.start_lat,
@@ -161,7 +163,7 @@ app.post('/trips', function (req, res) {
     requestTrip(body, token, res);
 });
 
-app.post('/webhooks', function (req, res) {
+app.post(webhook_path, function (req, res) {
     console.log(JSON.stringify(req.body, null, 2));
     res.send("Success");
 });

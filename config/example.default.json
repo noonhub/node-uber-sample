@@ -10,6 +10,8 @@
     "client_secret": "CLIENT_SECRET",
     "redirect_host": "https://my.server.puppies",
     "redirect_path": "/path/to/redirect",
+    "webhook_path": "/webhooks",
+    "surge_path": "/surge-accept",
     "scopes": "SPACE DELIMITED SCOPES"
   },
   "port": "3000",
