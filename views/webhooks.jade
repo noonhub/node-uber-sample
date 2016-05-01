@@ -1,0 +1,7 @@
+extends layout
+
+block content
+    div.container.text-center
+        ul
+            each webhook in data
+                li= JSON.stringify(webhook, null, 2)

@@ -2,3 +2,5 @@ bin
 node_modules
 *.iml
 config/default.json
+.idea
+storage
